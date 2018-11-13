@@ -24,10 +24,26 @@ static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L
                                   '0','1','2','3','4','5','6','7','8','9','+','/'];
 
 fn encode(_input: &[u8], _output: &mut String) {
+
     _output.push(TABLE[((_input[0] & 0xfc) >> 2) as usize]);
-    _output.push(TABLE[((_input[0] & 0x3) << 4 | (_input[1] & 0xf0) >> 4) as usize]);
-    _output.push(TABLE[((_input[1] & 0xf) << 2 | (_input[2] & 0xfc) >> 6) as usize]);
-    _output.push(TABLE[(_input[2] & 0x3f) as usize]);
+    match _input.len() {
+        1 => {
+            _output.push(TABLE[((_input[0] & 0x3) << 4) as usize]);
+            _output.push('=');
+            _output.push('=');
+        },
+        2 => {
+            _output.push(TABLE[((_input[0] & 0x3) << 4 | (_input[1] & 0xf0) >> 4) as usize]);
+            _output.push(TABLE[((_input[1] & 0xf) << 2) as usize]);
+            _output.push('=');
+        },
+        3 => {
+            _output.push(TABLE[((_input[0] & 0x3) << 4 | (_input[1] & 0xf0) >> 4) as usize]);
+            _output.push(TABLE[((_input[1] & 0xf) << 2 | (_input[2] & 0xfc) >> 6) as usize]);
+            _output.push(TABLE[(_input[2] & 0x3f) as usize]);
+        }
+        _ => println!("Unsupported length {}", _input.len()),
+    }
 }
 
 fn bytes_to_hex_digit(b : &str) -> u8 {
@@ -55,8 +71,6 @@ pub fn hex_to_base64(_input: &String) -> String {
             2 => {
                 let mut x = Vec::new();
                 x.push(bytes_to_hex_digit(&_stream[current_index..current_index+2]));
-                x.push(0);
-                x.push(0);
                 encode(&x, &mut _output);
                 return _output
             },
@@ -64,7 +78,6 @@ pub fn hex_to_base64(_input: &String) -> String {
                 let mut x = Vec::new();
                 x.push(bytes_to_hex_digit(&_stream[current_index..current_index+2]));
                 x.push(bytes_to_hex_digit(&_stream[current_index+2..current_index+4]));
-                x.push(0);
                 encode(&x, &mut _output);
                 return _output
             },
