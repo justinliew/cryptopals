@@ -1,0 +1,81 @@
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn example() {
+        let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
+        assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
+    }
+
+    #[test]
+    fn single() {
+        let output = super::hex_to_base64(&String::from("1"));
+        assert_eq!(output, "AQ==");
+    }
+
+    #[test]
+    fn simplest_example() {
+        let output = super::hex_to_base64(&String::from("010101"));
+        assert_eq!(output, "AQEB");
+    }
+}
+
+static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+                                  'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+                                  '0','1','2','3','4','5','6','7','8','9','+','/'];
+
+fn encode(_input: &[u8], _output: &mut String) {
+    _output.push(TABLE[((_input[0] & 0xfc) >> 2) as usize]);
+    _output.push(TABLE[((_input[0] & 0x3) << 4 | (_input[1] & 0xf0) >> 4) as usize]);
+    _output.push(TABLE[((_input[1] & 0xf) << 2 | (_input[2] & 0xfc) >> 6) as usize]);
+    _output.push(TABLE[(_input[2] & 0x3f) as usize]);
+}
+
+fn bytes_to_hex_digit(b : &str) -> u8 {
+    u8::from_str_radix(b, 16).unwrap()
+}
+
+pub fn hex_to_base64(_input: &String) -> String {
+    let mut _num_bytes = _input.len();
+    let mut _stream = String::new();
+    if _num_bytes % 2 != 0 {
+        _stream.push_str("0");
+        _num_bytes = _num_bytes + 1;
+    }
+
+    _stream.push_str(_input);
+    let mut current_index = 0;
+
+    let mut _output = String::from("");
+    loop {
+        match _num_bytes - current_index {
+            0 => return _output,
+            1 | 3 | 5 => {
+                println!("Unsupported bytes");
+            },
+            2 => {
+                let mut x = Vec::new();
+                x.push(bytes_to_hex_digit(&_stream[current_index..current_index+2]));
+                x.push(0);
+                x.push(0);
+                encode(&x, &mut _output);
+                return _output
+            },
+            4 => {
+                let mut x = Vec::new();
+                x.push(bytes_to_hex_digit(&_stream[current_index..current_index+2]));
+                x.push(bytes_to_hex_digit(&_stream[current_index+2..current_index+4]));
+                x.push(0);
+                encode(&x, &mut _output);
+                return _output
+            },
+            _ => {
+                let mut x = Vec::new();
+                x.push(bytes_to_hex_digit(&_stream[current_index..current_index+2]));
+                x.push(bytes_to_hex_digit(&_stream[current_index+2..current_index+4]));
+                x.push(bytes_to_hex_digit(&_stream[current_index+4..current_index+6]));
+                encode(&x, &mut _output);
+            }
+        };
+        current_index = current_index + 6;
+    };
+}
