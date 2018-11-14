@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod c1_tests {
     #[test]
     fn example() {
         let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
@@ -16,6 +16,21 @@ mod tests {
     fn simplest_example() {
         let output = super::hex_to_base64(&String::from("010101"));
         assert_eq!(output, "AQEB");
+    }
+}
+
+#[cfg(test)]
+mod c2_tests {
+    // #[test]
+    // fn example() {
+    //     let output = super::fixed_xor(&String::from("1c0111001f010100061a024b53535009181c"), &String::from("686974207468652062756c6c277320657965"));
+    //     assert_eq!(output, "746865206b696420646f6e277420706c6179");
+    // }
+
+    #[test]
+    fn basic() {
+        let output = super::fixed_xor(&String::from("1"), &String::from("1"));
+        assert_eq!(output, "0");
     }
 }
 
@@ -50,7 +65,7 @@ fn bytes_to_hex_digit(b : &str) -> u8 {
     u8::from_str_radix(b, 16).unwrap()
 }
 
-pub fn hex_to_base64(_input: &String) -> String {
+pub fn hex_to_base64(_input: &str) -> String {
     let mut _num_bytes = _input.len();
     let mut _stream = String::new();
     if _num_bytes % 2 != 0 {
@@ -91,4 +106,31 @@ pub fn hex_to_base64(_input: &String) -> String {
         };
         current_index = current_index + 6;
     };
+}
+
+fn xor(_lhs: &str, _rhs: &str) -> String {
+    let _lhs_bytes = _lhs.as_bytes();
+    let _rhs_bytes = _rhs.as_bytes();
+    println!("LEN: {}, LHS: {}, RHS: {}, XOR: {}", _lhs_bytes.len(), _lhs_bytes[0], _rhs_bytes[0], _lhs_bytes[0] ^ _rhs_bytes[0]);
+
+    let mut _output_bytes = Vec::new();
+    let _zip_iter = _lhs_bytes.iter().zip(_rhs_bytes.iter());
+    for (x,y) in _zip_iter {
+        println!("{} xor {} = {}", x,y,x^y);
+        _output_bytes.push(x ^ y);
+    }
+
+    // this should be the goal but I need to break it up in order to understand and debug it
+    // _lhs_bytes.iter()
+    //             .zip(_rhs_bytes.iter())
+    //             .map(|(x,y)| (x ^ y));
+
+    String::from("unimplemented")
+}
+
+pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
+    let _lhs_decoded = hex_to_base64(_lhs);
+    let _rhs_decoded = hex_to_base64(_rhs);
+    assert_eq!(_lhs_decoded.len(), _rhs_decoded.len());
+    xor(&_lhs_decoded,&_rhs_decoded)
 }
