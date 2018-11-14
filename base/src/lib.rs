@@ -33,11 +33,11 @@ mod c2_tests {
     //     assert_eq!(output, "746865206b696420646f6e277420706c6179");
     // }
 
-    // #[test]
-    // fn basic() {
-    //     let output = super::fixed_xor(&String::from("12"), &String::from("12"));
-    //     assert_eq!(output, "0");
-    // }
+    #[test]
+    fn basic() {
+        let output = super::fixed_xor(&String::from("12"), &String::from("12"));
+        assert_eq!(output, "0");
+    }
 }
 
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -86,6 +86,16 @@ fn string_to_hex(_input: &str) -> Vec<u8> {
     _output
 }
 
+fn hex_to_string(_input: &Vec<u8>) -> String {
+    let _output = String::new();
+
+    for _i in _input.iter() {
+        // TODO
+//        _output.push(_i.to_string());
+    }
+    _output
+}
+
 pub fn hex_to_base64(_input: &str) -> String {
     let mut current_index = 0;
     let _input_hex = string_to_hex(_input);
@@ -112,13 +122,11 @@ pub fn hex_to_base64(_input: &str) -> String {
 
 fn xor(_lhs: &str, _rhs: &str) -> String {
     let _lhs_hex = string_to_hex(_lhs);
-    let _rhs_hex = _rhs.as_bytes();
-    println!("LHS: {}, RHS: {}, XOR: {}", _lhs_hex[0], _rhs_hex[0], _lhs_hex[0] ^ _rhs_hex[0]);
+    let _rhs_hex = string_to_hex(_rhs);
 
     let mut _output_bytes = Vec::new();
     let _zip_iter = _lhs_hex.iter().zip(_rhs_hex.iter());
     for (x,y) in _zip_iter {
-        println!("{} xor {} = {}", x,y,x^y);
         _output_bytes.push(x ^ y);
     }
 
@@ -127,7 +135,8 @@ fn xor(_lhs: &str, _rhs: &str) -> String {
     //             .zip(_rhs_bytes.iter())
     //             .map(|(x,y)| (x ^ y));
 
-    String::from("unimplemented")
+//    String::from_utf8(_output_bytes).unwrap()
+    hex_to_string(&_output_bytes)
 }
 
 pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
