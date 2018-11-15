@@ -1,7 +1,3 @@
-use std::fs::File;
-use std::io::prelude::*;
-use std::collections::HashMap;
-
 #[cfg(test)]
 mod c1_tests {
     #[test]
@@ -50,18 +46,12 @@ mod c2_tests {
     }
 }
 
-mod c3_tests {
+#[cfg(test)]
+mod c5_tests {
     #[test]
     fn test() {
-        let (_ret,_i) = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
-        assert_eq!(_ret, "Cooking MC's like a pound of bacon");
-    }
-}
-
-mod c4_tests {
-    #[test]
-    fn test() {
-        super::find_sentence();        
+        let s = super::repeating_xor(&String::from("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"), &String::from("ICE"));        
+        assert_eq!(s, "b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
     }
 }
 
@@ -137,82 +127,135 @@ pub fn fixed_xor_from_u8(_lhs: &Vec<u8>, _rhs: &Vec<u8>) -> Vec<u8> {
     res
 }
 
-// 65-90
-// 97-122
-// ETAOIN SHRDLU
-fn score_candidate(_candidate: &Vec<u8>) -> i32 {
-    let mut common = HashMap::new();
-    common.insert('e',3);
-    common.insert('t',3);
-    common.insert('a',3);
-    common.insert('o',3);
-    common.insert('i',2);
-    common.insert('n',2);
-    common.insert('s',2);
-    common.insert('h',2);
-    common.insert('r',2);
-    common.insert('d',2);
-    common.insert('l',2);
-    common.insert('u',2);
+pub fn fixed_xor_from_u8_slice(_lhs: &[u8], _rhs: &Vec<u8>) -> Vec<u8> {
 
-    let mut _score = 0;
-    for _i in _candidate.iter() {
-        let mut _v = *_i;
-        if *_i >= 65 && *_i <= 90 {
-            _v = *_i + 32;
+    let res = _lhs.iter()
+            .zip(_rhs.iter())
+            .map(|(x,y)| (x ^ y))
+            .collect();
+    res
+}
+
+pub fn repeating_xor(_human_string: &str, _mask: &str) -> String {
+    // convert _human_string to hex
+    let _input = _human_string.as_bytes();
+    let _mask_bytes = _mask.as_bytes();
+
+    // convert _mask to repeating mask in hex
+    let _repetitions = _input.len() / _mask.len();
+    let _remainder = _input.len() % _mask.len();
+
+    let mut _full_mask : Vec<u8> = Vec::new();
+    for _i in 0.._repetitions {
+        _full_mask.extend_from_slice(& _mask_bytes);
+    }
+    for _i in 0.._remainder {
+        _full_mask.push(_mask_bytes[_i])
+    }
+    input_helpers::u8_to_hex_string(&fixed_xor_from_u8_slice(_input, &_full_mask))
+}
+
+mod sentences {
+
+    use std::fs::File;
+    use std::io::prelude::*;
+    use std::collections::HashMap;
+
+    mod c3_tests {
+        #[test]
+        fn test() {
+            let (_ret,_i) = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
+            assert_eq!(_ret, "Cooking MC's like a pound of bacon");
         }
+    }
 
-        if _v >= 97 && _v <= 122 {
-            match common.get(&(_v as char)) {
-                Some(_c) => _score = _score + _c,
-                None => _score = _score + 1                
+    mod c4_tests {
+        // commenting this one out as it's super slow
+        // #[test]
+        // fn test() {
+        //     let _s = super::find_sentence();
+        //     assert_eq!(_s, "Now that the party is jumping\n");
+        // }
+    }
+
+    // 65-90
+    // 97-122
+    // ETAOIN SHRDLU
+    fn score_candidate(_candidate: &Vec<u8>) -> i32 {
+        let mut common = HashMap::new();
+        common.insert('e',3);
+        common.insert('t',3);
+        common.insert('a',3);
+        common.insert('o',3);
+        common.insert('i',2);
+        common.insert('n',2);
+        common.insert('s',2);
+        common.insert('h',2);
+        common.insert('r',2);
+        common.insert('d',2);
+        common.insert('l',2);
+        common.insert('u',2);
+
+        let mut _score = 0;
+        for _i in _candidate.iter() {
+            let mut _v = *_i;
+            if *_i >= 65 && *_i <= 90 {
+                _v = *_i + 32;
             }
-        } else if *_i < 32 || *_i > 126 {
-            _score = _score-1;
-        } else {
-            // this seems to break things
-//            _score = _score+1;
-        }
-    }
-    _score
-}
 
-pub fn get_best_candidate_sentence(_input: &str) -> (String, i32) {
-    let mut _best_score = 0;
-    let mut _best_string = String::new();
-    for _c in 1..256 {
-        let mut _mask = vec![];
-        for _i in 0.._input.len() {
-            _mask.push(_c as u8);
+            if _v >= 97 && _v <= 122 {
+                match common.get(&(_v as char)) {
+                    Some(_c) => _score = _score + _c,
+                    None => _score = _score + 1                
+                }
+            } else if *_i < 32 || *_i > 126 {
+                _score = _score-1;
+            } else {
+                // this seems to break things
+    //            _score = _score+1;
+            }
         }
-        let _input_hex = input_helpers::hex_string_to_u8(_input);
-        let _candidate = fixed_xor_from_u8(&_input_hex, &_mask);
-        let _score = score_candidate(&_candidate);
-        if _score > _best_score {
-            _best_score = _score;
-            _best_string = input_helpers::u8_to_string(&_candidate);
-        }
+        _score
     }
 
-    (_best_string, _best_score)
-}
-
-pub fn find_sentence() {
-    let mut _f = File::open("4.txt").expect("file not found");
-
-    let mut _contents = String::new();
-    _f.read_to_string(&mut _contents)
-        .expect("something went wrong reading the file");
-    let _lines = _contents.split("\n");
-
-    let mut _best_score = 0;
-    let mut _best_string = String::new();
-    for _line in _lines {
-        let (_out,_score) = get_best_candidate_sentence(_line);
-        if _score > _best_score {
-            _best_score = _score;
-            _best_string = _out;
+    pub fn get_best_candidate_sentence(_input: &str) -> (String, i32) {
+        let mut _best_score = 0;
+        let mut _best_string = String::new();
+        for _c in 1..256 {
+            let mut _mask = vec![];
+            for _i in 0.._input.len() {
+                _mask.push(_c as u8);
+            }
+            let _input_hex = super::input_helpers::hex_string_to_u8(_input);
+            let _candidate = super::fixed_xor_from_u8(&_input_hex, &_mask);
+            let _score = score_candidate(&_candidate);
+            if _score > _best_score {
+                _best_score = _score;
+                _best_string = super::input_helpers::u8_to_string(&_candidate);
+            }
         }
+
+        (_best_string, _best_score)
     }
-    println!("{} -> {}", _best_string, _best_score);
+
+    pub fn find_sentence() -> String {
+        let mut _f = File::open("4.txt").expect("file not found");
+
+        let mut _contents = String::new();
+        _f.read_to_string(&mut _contents)
+            .expect("something went wrong reading the file");
+        let _lines = _contents.split("\n");
+
+        let mut _best_score = 0;
+        let mut _best_string = String::new();
+        for _line in _lines {
+            let (_out,_score) = get_best_candidate_sentence(_line);
+            if _score > _best_score {
+                _best_score = _score;
+                _best_string = _out;
+            }
+        }
+        _best_string
+    //    println!("{} -> {}", _best_string, _best_score);
+    }
 }
