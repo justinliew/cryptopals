@@ -1,28 +1,37 @@
 #[cfg(test)]
+mod basic_tests {
+    #[test]
+    fn string_to_hex_and_back() {
+        let transformed = super::u8_to_hex_string(&super::hex_string_to_u8("123456789abcdef"));
+        assert_eq!(transformed, "123456789abcdef");
+    }
+}
+
+#[cfg(test)]
 mod c1_tests {
-    #[test]
-    fn example() {
-        let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
-        assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
-    }
+    // #[test]
+    // fn example() {
+    //     let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
+    //     assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
+    // }
 
-    #[test]
-    fn single() {
-        let output = super::hex_to_base64(&String::from("1"));
-        assert_eq!(output, "AQ==");
-    }
+    // #[test]
+    // fn single() {
+    //     let output = super::hex_to_base64(&String::from("1"));
+    //     assert_eq!(output, "AQ==");
+    // }
 
-    #[test]
-    fn double() {
-        let output = super::hex_to_base64(&String::from("12"));
-        assert_eq!(output, "Eg==");
-    }
+    // #[test]
+    // fn double() {
+    //     let output = super::hex_to_base64(&String::from("12"));
+    //     assert_eq!(output, "Eg==");
+    // }
 
-    #[test]
-    fn simplest_example() {
-        let output = super::hex_to_base64(&String::from("010101"));
-        assert_eq!(output, "AQEB");
-    }
+    // #[test]
+    // fn simplest_example() {
+    //     let output = super::hex_to_base64(&String::from("010101"));
+    //     assert_eq!(output, "AQEB");
+    // }
 }
 
 #[cfg(test)]
@@ -33,11 +42,55 @@ mod c2_tests {
     //     assert_eq!(output, "746865206b696420646f6e277420706c6179");
     // }
 
-    #[test]
-    fn basic() {
-        let output = super::fixed_xor(&String::from("12"), &String::from("12"));
-        assert_eq!(output, "0");
+    // #[test]
+    // fn start_of_example() {
+    //     let output = super::fixed_xor(&String::from("1c01"), &String::from("6869"));
+    //     assert_eq!(output, "7468");
+    // }
+
+    // #[test]
+    // fn basic() {
+    //     let output = super::fixed_xor(&String::from("12"), &String::from("12"));
+    //     assert_eq!(output, "0");
+    // }
+}
+
+fn hex_string_to_u8(_input: &str) -> Vec<u8> {
+    let mut _stream = String::new();
+    if _input.len() % 2 != 0 {
+        _stream.push_str("0");
     }
+    _stream.push_str(_input);
+
+    let mut _output = Vec::new();
+    let mut _i = 0;
+    while _i < _stream.len() {
+        _output.push(u8::from_str_radix(&_stream[_i.._i+2],16).unwrap());
+        _i += 2;
+    }
+    _output
+}
+
+static HEX_TABLE: &'static [char] = &['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+
+fn u8_to_hex_string(_input: &Vec<u8>) -> String {
+    let mut _output = String::new();
+
+    for _i in _input.iter() {
+
+        let mut _quotient : u8 = *_i;
+        println!("Initial Q: {}", _quotient);
+        loop {
+            let _remainder = _quotient % 16;
+            _quotient = _quotient / 16;
+            println!("Q: {}, R: {}", _quotient, HEX_TABLE[_remainder as usize]);
+            _output.push_str(&*_remainder.to_string());
+            if _quotient == 0 {
+                break
+            }
+        }
+    }
+    _output
 }
 
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -66,79 +119,43 @@ fn encode(_input: &[u8], _output: &mut String) {
     }
 }
 
-fn bytes_to_hex_digit(b : &str) -> u8 {
-    u8::from_str_radix(b, 16).unwrap()
-}
-
-fn string_to_hex(_input: &str) -> Vec<u8> {
-    let mut _stream = String::new();
-    if _input.len() % 2 != 0 {
-        _stream.push_str("0");
-    }
-    _stream.push_str(_input);
-
-    let mut _output = Vec::new();
-    let mut _i = 0;
-    while _i < _stream.len() {
-        _output.push(bytes_to_hex_digit(&_stream[_i.._i+2]));
-        _i += 2;
-    }
-    _output
-}
-
-fn hex_to_string(_input: &Vec<u8>) -> String {
-    let _output = String::new();
-
-    for _i in _input.iter() {
-        // TODO
-//        _output.push(_i.to_string());
-    }
-    _output
-}
-
 pub fn hex_to_base64(_input: &str) -> String {
     let mut current_index = 0;
-    let _input_hex = string_to_hex(_input);
+    let _input_u8 = hex_string_to_u8(_input);
 
     let mut _output = String::from("");
     loop {
-        match _input_hex.len() - current_index {
+        match _input_u8.len() - current_index {
             0 => return _output,
             1 => {
-                encode(&_input_hex[current_index..current_index+1], &mut _output);
+                encode(&_input_u8[current_index..current_index+1], &mut _output);
                 return _output
             },
             2 => {
-                encode(&_input_hex[current_index..current_index+2], &mut _output);
+                encode(&_input_u8[current_index..current_index+2], &mut _output);
                 return _output
             },
             _ => {
-                encode(&_input_hex[current_index..current_index+3], &mut _output);
+                encode(&_input_u8[current_index..current_index+3], &mut _output);
                 current_index = current_index + 3;
             }
         };
     };
 }
 
-fn xor(_lhs: &str, _rhs: &str) -> String {
-    let _lhs_hex = string_to_hex(_lhs);
-    let _rhs_hex = string_to_hex(_rhs);
+pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
+    let _lhs_hex = hex_string_to_u8(_lhs);
+    let _rhs_hex = hex_string_to_u8(_rhs);
 
-    let mut _output_bytes = Vec::new();
     let _zip_iter = _lhs_hex.iter().zip(_rhs_hex.iter());
     for (x,y) in _zip_iter {
-        _output_bytes.push(x ^ y);
+        println!("X: {}, Y: {}, XOR: {}", x, y, x^y);
     }
 
     // this should be the goal but I need to break it up in order to understand and debug it
-    // _lhs_bytes.iter()
-    //             .zip(_rhs_bytes.iter())
-    //             .map(|(x,y)| (x ^ y));
-
-//    String::from_utf8(_output_bytes).unwrap()
-    hex_to_string(&_output_bytes)
-}
-
-pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
-    xor(&_lhs,&_rhs)
+    let res = _lhs_hex.iter()
+            .zip(_rhs_hex.iter())
+            .map(|(x,y)| (x ^ y))
+            .collect();
+    u8_to_hex_string(&res)
 }
