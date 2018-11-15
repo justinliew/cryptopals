@@ -117,15 +117,24 @@ pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
     input_helpers::u8_to_hex_string(&res)
 }
 
+pub fn fixed_xor_from_u8(_lhs: &Vec<u8>, _rhs: &Vec<u8>) -> String {
+
+    let res = _lhs.iter()
+            .zip(_rhs.iter())
+            .map(|(x,y)| (x ^ y))
+            .collect();
+    input_helpers::u8_to_hex_string(&res)
+}
+
 pub fn get_best_candidate_sentence(_input: &str) -> String {
     for _c in 1..256 {
-        let mut _mask = String::new();
-        println!("Input {}", _input.len());
+        let mut _mask = vec![];
         for _i in 0.._input.len() {
-            _mask.push(46 as char);
+            _mask.push(_c as u8);
         }
-        println!("Mask: {}", _mask);
-        let _candidate = fixed_xor(_input, &_mask);
+        let _input_hex = input_helpers::hex_string_to_u8(_input);
+        let _candidate = fixed_xor_from_u8(&_input_hex, &_mask);
+        println!("C: {}", _candidate);
     }
 
     String::new()
