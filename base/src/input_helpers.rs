@@ -36,3 +36,11 @@ pub fn u8_to_hex_string(_input: &Vec<u8>) -> String {
     }
     _output
 }
+
+pub fn u8_to_string(_input: &Vec<u8>) -> String {
+    let mut _output = String::new();
+    for _i in _input.iter() {
+        _output.push(*_i as char);
+    }
+    _output
+}

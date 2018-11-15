@@ -49,8 +49,8 @@ mod c2_tests {
 mod c3_tests {
     #[test]
     fn test() {
-        let ret = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
-        println!("{}", ret);
+        let (ret,i) = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
+        println!("Best string: {}", ret);
     }
 }
 
@@ -117,16 +117,30 @@ pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
     input_helpers::u8_to_hex_string(&res)
 }
 
-pub fn fixed_xor_from_u8(_lhs: &Vec<u8>, _rhs: &Vec<u8>) -> String {
+pub fn fixed_xor_from_u8(_lhs: &Vec<u8>, _rhs: &Vec<u8>) -> Vec<u8> {
 
     let res = _lhs.iter()
             .zip(_rhs.iter())
             .map(|(x,y)| (x ^ y))
             .collect();
-    input_helpers::u8_to_hex_string(&res)
+    res
 }
 
-pub fn get_best_candidate_sentence(_input: &str) -> String {
+// 65-90
+// 97-122
+fn score_candidate(_candidate: &Vec<u8>) -> i32 {
+    let mut _score = 0;
+    for _i in _candidate.iter() {
+        if (*_i >= 65 && *_i <= 90) || (*_i >= 97 && *_i < 122) {
+            _score = _score + 1;
+        }
+    }
+    _score
+}
+
+pub fn get_best_candidate_sentence(_input: &str) -> (String, i32) {
+    let mut _best_score = 0;
+    let mut _best_string = String::new();
     for _c in 1..256 {
         let mut _mask = vec![];
         for _i in 0.._input.len() {
@@ -134,8 +148,12 @@ pub fn get_best_candidate_sentence(_input: &str) -> String {
         }
         let _input_hex = input_helpers::hex_string_to_u8(_input);
         let _candidate = fixed_xor_from_u8(&_input_hex, &_mask);
-        println!("C: {}", _candidate);
+        let _score = score_candidate(&_candidate);
+        if _score > _best_score {
+            _best_score = _score;
+            _best_string = input_helpers::u8_to_string(&_candidate);
+        }
     }
 
-    String::new()
+    (_best_string, _best_score)
 }
