@@ -46,6 +46,14 @@ mod c2_tests {
     }
 }
 
+mod c3_tests {
+    #[test]
+    fn test() {
+        let ret = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
+        println!("{}", ret);
+    }
+}
+
 mod input_helpers;
 
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -107,4 +115,18 @@ pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
             .map(|(x,y)| (x ^ y))
             .collect();
     input_helpers::u8_to_hex_string(&res)
+}
+
+pub fn get_best_candidate_sentence(_input: &str) -> String {
+    for _c in 1..256 {
+        let mut _mask = String::new();
+        println!("Input {}", _input.len());
+        for _i in 0.._input.len() {
+            _mask.push(46 as char);
+        }
+        println!("Mask: {}", _mask);
+        let _candidate = fixed_xor(_input, &_mask);
+    }
+
+    String::new()
 }
