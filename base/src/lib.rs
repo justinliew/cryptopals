@@ -1,58 +1,49 @@
 #[cfg(test)]
-mod basic_tests {
+mod c1_tests {
     #[test]
-    fn string_to_hex_and_back() {
-        let transformed = super::u8_to_hex_string(&super::hex_string_to_u8("123456789abcdef"));
-        assert_eq!(transformed, "123456789abcdef");
+    fn example() {
+        let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
+        assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
+    }
+
+    #[test]
+    fn single() {
+        let output = super::hex_to_base64(&String::from("1"));
+        assert_eq!(output, "AQ==");
+    }
+
+    #[test]
+    fn double() {
+        let output = super::hex_to_base64(&String::from("12"));
+        assert_eq!(output, "Eg==");
+    }
+
+    #[test]
+    fn simplest_example() {
+        let output = super::hex_to_base64(&String::from("010101"));
+        assert_eq!(output, "AQEB");
     }
 }
 
 #[cfg(test)]
-mod c1_tests {
-    // #[test]
-    // fn example() {
-    //     let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
-    //     assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
-    // }
-
-    // #[test]
-    // fn single() {
-    //     let output = super::hex_to_base64(&String::from("1"));
-    //     assert_eq!(output, "AQ==");
-    // }
-
-    // #[test]
-    // fn double() {
-    //     let output = super::hex_to_base64(&String::from("12"));
-    //     assert_eq!(output, "Eg==");
-    // }
-
-    // #[test]
-    // fn simplest_example() {
-    //     let output = super::hex_to_base64(&String::from("010101"));
-    //     assert_eq!(output, "AQEB");
-    // }
-}
-
-#[cfg(test)]
 mod c2_tests {
-    // #[test]
-    // fn example() {
-    //     let output = super::fixed_xor(&String::from("1c0111001f010100061a024b53535009181c"), &String::from("686974207468652062756c6c277320657965"));
-    //     assert_eq!(output, "746865206b696420646f6e277420706c6179");
-    // }
+    #[test]
+    fn example() {
+        let output = super::fixed_xor(&String::from("1c0111001f010100061a024b53535009181c"), &String::from("686974207468652062756c6c277320657965"));
+        assert_eq!(output, "746865206b696420646f6e277420706c6179");
+    }
 
-    // #[test]
-    // fn start_of_example() {
-    //     let output = super::fixed_xor(&String::from("1c01"), &String::from("6869"));
-    //     assert_eq!(output, "7468");
-    // }
+    #[test]
+    fn start_of_example() {
+        let output = super::fixed_xor(&String::from("1f01"), &String::from("7468"));
+        assert_eq!(output, "6b69");
+    }
 
-    // #[test]
-    // fn basic() {
-    //     let output = super::fixed_xor(&String::from("12"), &String::from("12"));
-    //     assert_eq!(output, "0");
-    // }
+    #[test]
+    fn basic() {
+        let output = super::fixed_xor(&String::from("12"), &String::from("12"));
+        assert_eq!(output, "0");
+    }
 }
 
 fn hex_string_to_u8(_input: &str) -> Vec<u8> {
@@ -79,16 +70,17 @@ fn u8_to_hex_string(_input: &Vec<u8>) -> String {
     for _i in _input.iter() {
 
         let mut _quotient : u8 = *_i;
-        println!("Initial Q: {}", _quotient);
+        let mut _substring = String::new();
         loop {
             let _remainder = _quotient % 16;
             _quotient = _quotient / 16;
-            println!("Q: {}, R: {}", _quotient, HEX_TABLE[_remainder as usize]);
-            _output.push_str(&*_remainder.to_string());
+            _substring.push(HEX_TABLE[_remainder as usize]);
             if _quotient == 0 {
                 break
             }
         }
+        ;
+        _output.push_str(&_substring.chars().rev().collect::<String>());
     }
     _output
 }
@@ -147,12 +139,6 @@ pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
     let _lhs_hex = hex_string_to_u8(_lhs);
     let _rhs_hex = hex_string_to_u8(_rhs);
 
-    let _zip_iter = _lhs_hex.iter().zip(_rhs_hex.iter());
-    for (x,y) in _zip_iter {
-        println!("X: {}, Y: {}, XOR: {}", x, y, x^y);
-    }
-
-    // this should be the goal but I need to break it up in order to understand and debug it
     let res = _lhs_hex.iter()
             .zip(_rhs_hex.iter())
             .map(|(x,y)| (x ^ y))
