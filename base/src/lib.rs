@@ -56,18 +56,13 @@ mod c5_tests {
     }
 
     #[test]
-    fn test_simple() {
-        let s = super::repeating_xor(&String::from("Burning 'em, if you ain't quick and nimble\n"), &String::from("ICE"));        
-        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f2043");
-    }
-
-    #[test]
     // why does the original not work? There are a couple of extra 0s which I don't understand
     fn test() {
         let s = super::repeating_xor(&String::from("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"), &String::from("ICE"));        
-        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f2043a652e2c652a3124333a653e2b202763c692b20283165286326302e27282f");
+//        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f2043a652e2c652a3124333a653e2b202763c692b20283165286326302e27282f");
         // this is the original and doesn't work because of 3 0s.
-//        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
+        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
+                    // B u r n i n g   ' e m ,   i f   y o u   a i n ' t   q u i c k   a n d   n i m b l e \ n I   g o   c r a z y   w h e n   I   h e a r   a   c y m b a l
     }
 }
 
@@ -144,7 +139,6 @@ pub fn fixed_xor_from_u8(_lhs: &Vec<u8>, _rhs: &Vec<u8>) -> Vec<u8> {
 }
 
 pub fn fixed_xor_from_u8_slice(_lhs: &[u8], _rhs: &Vec<u8>) -> Vec<u8> {
-
     let res = _lhs.iter()
             .zip(_rhs.iter())
             .map(|(x,y)| (x ^ y))
@@ -274,4 +268,13 @@ mod sentences {
         _best_string
     //    println!("{} -> {}", _best_string, _best_score);
     }
+}
+
+fn hamming_distance(_lhs: &str, _rhs: &str) -> u32 {
+    let _lhs_bytes: &[u8] = _lhs.as_bytes();
+    let _rhs_bytes: &[u8] = _rhs.as_bytes();
+
+
+
+    0
 }

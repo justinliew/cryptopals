@@ -16,6 +16,20 @@ pub fn hex_string_to_u8(_input: &str) -> Vec<u8> {
 
 static HEX_TABLE: &'static [char] = &['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
 
+pub fn decimal_to_hex_string(mut _input: u8) -> String {
+    let mut _substring = String::new();
+    loop {
+        let _remainder = _input % 16;
+        _input = _input / 16;
+
+        _substring.push(HEX_TABLE[_remainder as usize]);
+        if _input == 0 {
+            break
+        }
+    }
+    _substring.chars().rev().collect::<String>()
+}
+
 pub fn u8_to_hex_string(_input: &Vec<u8>) -> String {
     let mut _output = String::new();
 
@@ -31,7 +45,9 @@ pub fn u8_to_hex_string(_input: &Vec<u8>) -> String {
                 break
             }
         }
-        ;
+        if _substring.len() == 1 {
+            _substring.push('0');
+        }
         _output.push_str(&_substring.chars().rev().collect::<String>());
     }
 
