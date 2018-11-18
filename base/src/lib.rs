@@ -59,10 +59,16 @@ mod c5_tests {
     // why does the original not work? There are a couple of extra 0s which I don't understand
     fn test() {
         let s = super::repeating_xor(&String::from("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"), &String::from("ICE"));        
-//        assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f2043a652e2c652a3124333a653e2b202763c692b20283165286326302e27282f");
-        // this is the original and doesn't work because of 3 0s.
         assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
-                    // B u r n i n g   ' e m ,   i f   y o u   a i n ' t   q u i c k   a n d   n i m b l e \ n I   g o   c r a z y   w h e n   I   h e a r   a   c y m b a l
+    }
+}
+
+#[cfg(test)]
+mod c6_tests {
+    #[test]
+    fn simple() {
+        let s = super::hamming_distance("this is a test","wokka wokka!!!");
+        assert_eq!(s,37);
     }
 }
 
@@ -72,7 +78,36 @@ static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L
                                   'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
                                   '0','1','2','3','4','5','6','7','8','9','+','/'];
 
-fn encode(_input: &[u8], _output: &mut String) {
+fn find_index_in_table(_input: u8) -> u32 {
+    for i in 0..TABLE.len() {
+        if _input == TABLE[i] as u8 {
+            return i as u32
+        }
+    }
+    assert!(false);
+    0
+}
+
+fn decode_from_base64(_input: &[u8], _output: &mut String) {
+    let _byte_0 = _input[0] << 2;
+    let _byte_1 = _input[1];
+    match _input.len() {
+        2 => {
+            _output.push(_byte_0 as char);
+            return;
+        },
+        3 => {
+            _output.push(_byte_0 as char);
+            return;
+        },
+        4 => {
+
+        },
+        _ => assert!(false)
+    }
+}
+
+fn encode_to_base64(_input: &[u8], _output: &mut String) {
     _output.push(TABLE[((_input[0] & 0xfc) >> 2) as usize]);
     match _input.len() {
         1 => {
@@ -103,19 +138,38 @@ pub fn hex_to_base64(_input: &str) -> String {
         match _input_u8.len() - current_index {
             0 => return _output,
             1 => {
-                encode(&_input_u8[current_index..current_index+1], &mut _output);
+                encode_to_base64(&_input_u8[current_index..current_index+1], &mut _output);
                 return _output
             },
             2 => {
-                encode(&_input_u8[current_index..current_index+2], &mut _output);
+                encode_to_base64(&_input_u8[current_index..current_index+2], &mut _output);
                 return _output
             },
             _ => {
-                encode(&_input_u8[current_index..current_index+3], &mut _output);
+                encode_to_base64(&_input_u8[current_index..current_index+3], &mut _output);
                 current_index = current_index + 3;
             }
         };
     };
+}
+
+pub fn base_64_to_hex(_input: &str) -> String {
+    let mut current_index = 0;
+    let _input_u8 = _input.as_bytes();
+
+    let mut _output = String::new();
+    loop {
+        if _input_u8[current_index+2] == ('=' as u8) {
+            decode_from_base64(&_input_u8[current_index..current_index+2], &mut _output);
+            return _output
+        }
+        if _input_u8[current_index+3] == ('=' as u8) {
+            decode_from_base64(&_input_u8[current_index..current_index+1], &mut _output);
+            return _output
+        }
+        decode_from_base64(&_input_u8[current_index..current_index+3], &mut _output);
+        current_index = current_index + 3;
+    }
 }
 
 pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
@@ -163,6 +217,41 @@ pub fn repeating_xor(_human_string: &str, _mask: &str) -> String {
         _full_mask.push(_mask_bytes[_i])
     }
     input_helpers::u8_to_hex_string(&fixed_xor_from_u8_slice(_input, &_full_mask))
+}
+
+fn count_bits(_byte: u8) -> i32 {
+    let mut ret : u8 = 0;
+    for _i in 0..8 {
+        ret += (_byte >> _i) & 1;
+    }
+
+    ret as i32
+}
+
+fn hamming_distance(_lhs: &str, _rhs: &str) -> i32 {
+    let _lhs_bytes: &[u8] = _lhs.as_bytes();
+    let _rhs_bytes: &[u8] = _rhs.as_bytes();
+
+    let mut _res : i32 = 0;
+    for _v in _lhs_bytes.iter()
+                        .zip(_rhs_bytes.iter())
+                        .map(|(x,y)| count_bits(x^y))
+                        .collect::<Vec<i32>>() {
+                            _res += _v;
+                        }
+    _res
+}
+
+fn break_vigenere_cipher(_input: &str) {
+    // base64 decode
+
+    let mut _keysize = 2;
+
+    for _keysize in 2..41 {
+
+    }
+
+    // hex to string
 }
 
 mod sentences {
@@ -268,13 +357,4 @@ mod sentences {
         _best_string
     //    println!("{} -> {}", _best_string, _best_score);
     }
-}
-
-fn hamming_distance(_lhs: &str, _rhs: &str) -> u32 {
-    let _lhs_bytes: &[u8] = _lhs.as_bytes();
-    let _rhs_bytes: &[u8] = _rhs.as_bytes();
-
-
-
-    0
 }
