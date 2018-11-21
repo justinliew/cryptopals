@@ -108,7 +108,6 @@ fn decode_from_base64(_input: &[u8], _output: &mut String) {
 }
 
 fn encode_to_base64(_input: &[u8], _output: &mut String) {
-    _output.push(TABLE[((_input[0] & 0xfc) >> 2) as usize]);
     match _input.len() {
         1 => {
             _output.push(TABLE[((_input[0] & 0x3) << 4) as usize]);
@@ -135,18 +134,25 @@ pub fn hex_to_base64(_input: &str) -> String {
 
     let mut _output = String::from("");
     loop {
+        _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
         match _input_u8.len() - current_index {
             0 => return _output,
             1 => {
-                encode_to_base64(&_input_u8[current_index..current_index+1], &mut _output);
+                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4) as usize]);
+                _output.push('=');
+                _output.push('=');
                 return _output
             },
             2 => {
-                encode_to_base64(&_input_u8[current_index..current_index+2], &mut _output);
+                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
+                _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2) as usize]);
+                _output.push('=');
                 return _output
             },
             _ => {
-                encode_to_base64(&_input_u8[current_index..current_index+3], &mut _output);
+                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
+                _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2 | (_input_u8[current_index+2] & 0xfc) >> 6) as usize]);
+                _output.push(TABLE[(_input_u8[current_index+2] & 0x3f) as usize]);
                 current_index = current_index + 3;
             }
         };
