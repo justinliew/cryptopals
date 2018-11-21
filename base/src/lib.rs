@@ -134,22 +134,24 @@ pub fn hex_to_base64(_input: &str) -> String {
 
     let mut _output = String::from("");
     loop {
-        _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
         match _input_u8.len() - current_index {
             0 => return _output,
             1 => {
+                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
                 _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4) as usize]);
                 _output.push('=');
                 _output.push('=');
                 return _output
             },
             2 => {
+                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
                 _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
                 _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2) as usize]);
                 _output.push('=');
                 return _output
             },
             _ => {
+                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
                 _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
                 _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2 | (_input_u8[current_index+2] & 0xfc) >> 6) as usize]);
                 _output.push(TABLE[(_input_u8[current_index+2] & 0x3f) as usize]);
