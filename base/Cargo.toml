@@ -3,4 +3,8 @@ name = "base"
 version = "0.1.0"
 authors = ["Justin Liew <justinliew@gmail.com>"]
 
+[lib]
+name="base"
+path="src/lib.rs"
+
 [dependencies]
