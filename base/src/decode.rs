@@ -6,7 +6,7 @@ use convert;
 mod c3_tests {
     #[test]
     fn test() {
-        let (_ret,_i) = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
+        let (_ret,_i,_) = super::get_best_candidate_sentence(&String::from("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"));
         assert_eq!(_ret, "Cooking MC's like a pound of bacon");
     }
 }

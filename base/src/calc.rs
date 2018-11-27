@@ -65,6 +65,21 @@ mod c5_tests {
     }
 }
 
+#[cfg(test)]
+mod c6_tests {
+    
+    #[test]
+    fn prebaked() {
+        // we want to generate something here and ensure it gets back.
+        let original_text = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+        let key = "KLEI";
+        let cipher_text = super::repeating_xor(&original_text, &key);
+        let base64 = super::hex_to_base64(&cipher_text); 
+        println!("Cipher: {}", base64);
+        super::break_vigenere_cipher(&base64);
+    }
+}
+
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
                                   'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
                                   '0','1','2','3','4','5','6','7','8','9','+','/'];
@@ -245,14 +260,29 @@ pub fn break_vigenere_cipher(_input: &str) {
 
     let mut _keysize = 2;
 
-    let mut _best_distance = 99999;
+    let mut _best_distance : f32 = 99999.;
     let mut _best_distance_key_size : i32 = 2;
     for _keysize in 2..41 {
-        let distance1 = hamming_distance(&_input_bytes[0.._keysize], &_input_bytes[_keysize.._keysize*2]) / (_keysize as i32);
-        let distance2 = hamming_distance(&_input_bytes[_keysize*2.._keysize*3], &_input_bytes[_keysize*3.._keysize*4]) / (_keysize as i32);
-        let distance = (distance1 + distance2) / 2;
-        if distance < _best_distance {
-            _best_distance = distance;
+
+        let mut distances = vec![];
+        for _group in 0..(_input_bytes.len() / (_keysize*2)) {
+            let lower = _group * _keysize * 2;
+            let d = hamming_distance(&_input_bytes[lower..lower+_keysize], &_input_bytes[lower+_keysize..lower+_keysize*2]);
+            distances.push(d);
+        }
+        if distances.len() == 0 {
+            continue
+        }
+
+        let mut avg : f32 = 0.0;
+        for _i in distances.iter() {
+            avg += (*_i as f32);
+        }
+        avg = avg / _keysize as f32;
+        avg = avg / distances.len() as f32;
+        println!("Keysize: {}, Distance: {}", _keysize, avg);
+        if avg < _best_distance {
+            _best_distance = avg;
             _best_distance_key_size = _keysize as i32;
         }
     }
@@ -262,6 +292,6 @@ pub fn break_vigenere_cipher(_input: &str) {
 
     let _decoded = repeating_xor_from_bytes(&_input, &_key);
     let _decoded_string = convert::u8_to_string(&_decoded);
-    println!("Decoded string: {}", _decoded_string);
+//    println!("Decoded string: {}", _decoded_string);
 
 }
