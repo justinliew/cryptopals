@@ -254,6 +254,8 @@ fn transpose_and_test(_input: &[u8], _keysize: i32) -> Vec<u8> {
     _output
 }
 
+// https://trustedsignal.blogspot.com/2015/06/xord-play-normalized-hamming-distance.html
+// https://trustedsignal.blogspot.com/2015/07/cracking-repeating-xor-key-crypto.html
 pub fn break_vigenere_cipher(_input: &str) {
 
     let _input_bytes = decode_base64_to_bytes(&_input.replace("\n","")); 
