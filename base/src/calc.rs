@@ -68,15 +68,28 @@ mod c5_tests {
 #[cfg(test)]
 mod c6_tests {
     
+    // #[test]
+    // fn simple() {
+    //     let original = super::hex_to_base64(&String::from("a"));
+    //     println!("Original: {}", original);
+    //     let decoded = super::decode_base64_to_bytes(&original);
+    //     let hex_string = super::convert::u8_to_hex_string(&decoded);
+    //     println!("Decoded: {}", hex_string);
+    // }
+
     #[test]
     fn prebaked() {
         // we want to generate something here and ensure it gets back.
         let original_text = "fuse fuel for falling flocks";
-        let key = "KLEI";
+        let key = "few";
         let cipher_text = super::repeating_xor(&original_text, &key);
+        println!("Ciphertext: {}", cipher_text);
         let base64 = super::hex_to_base64(&cipher_text); 
-        println!("Cipher: {}", base64);
-        super::break_vigenere_cipher(&base64);
+        let hex = super::decode_base64_to_bytes(&base64);
+        let hex_string = super::convert::u8_to_hex_string(&hex);
+        println!("Decoded: {}", hex_string);
+        // TODO
+//        super::break_vigenere_cipher_base64(&base64);
     }
 }
 
@@ -236,13 +249,13 @@ fn hamming_distance(_lhs: &[u8], _rhs: &[u8]) -> i32 {
 fn transpose_and_test(_input: &[u8], _keysize: i32) -> Vec<u8> {
     let end = _input.len() as i32 - _keysize;
     let mut blocks : Vec<Vec<u8>> = Vec::new(); 
-    for i in 0.._keysize {
+    for _i in 0.._keysize {
         blocks.push(Vec::new());
     }
 
-    for i in 0..end {
-        let block_num = i % _keysize;
-        blocks[block_num as usize].push(_input[i as usize]);
+    for _i in 0..end {
+        let block_num = _i % _keysize;
+        blocks[block_num as usize].push(_input[_i as usize]);
     }
 
     let mut _output : Vec<u8> = Vec::new();
@@ -254,11 +267,15 @@ fn transpose_and_test(_input: &[u8], _keysize: i32) -> Vec<u8> {
     _output
 }
 
+pub fn break_vigenere_cipher_base64(_input_base64: &str) {
+
+    let _input_bytes = decode_base64_to_bytes(&_input_base64.replace("\n","")); 
+    break_vigenere_cipher(&_input_bytes);
+}
+
 // https://trustedsignal.blogspot.com/2015/06/xord-play-normalized-hamming-distance.html
 // https://trustedsignal.blogspot.com/2015/07/cracking-repeating-xor-key-crypto.html
-pub fn break_vigenere_cipher(_input: &str) {
-
-    let _input_bytes = decode_base64_to_bytes(&_input.replace("\n","")); 
+pub fn break_vigenere_cipher(_input_bytes: &Vec<u8>) {
 
     let mut _keysize = 2;
 
@@ -278,7 +295,7 @@ pub fn break_vigenere_cipher(_input: &str) {
 
         let mut avg : f32 = 0.0;
         for _i in distances.iter() {
-            avg += (*_i as f32);
+            avg += *_i as f32;
         }
         avg = avg / _keysize as f32;
         avg = avg / distances.len() as f32;
@@ -292,7 +309,7 @@ pub fn break_vigenere_cipher(_input: &str) {
     let _key = transpose_and_test(&_input_bytes, _best_distance_key_size);
     println!("Possible best keysize is {}; key is {:?}", _best_distance_key_size, _key);
 
-    let _decoded = repeating_xor_from_bytes(&_input, &_key);
+    let _decoded = repeating_xor_from_bytes(&_input_bytes, &_key);
     let _decoded_string = convert::u8_to_string(&_decoded);
 //    println!("Decoded string: {}", _decoded_string);
 
