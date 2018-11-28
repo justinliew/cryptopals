@@ -71,7 +71,7 @@ mod c6_tests {
     #[test]
     fn prebaked() {
         // we want to generate something here and ensure it gets back.
-        let original_text = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+        let original_text = "fuse fuel for falling flocks";
         let key = "KLEI";
         let cipher_text = super::repeating_xor(&original_text, &key);
         let base64 = super::hex_to_base64(&cipher_text); 
@@ -268,7 +268,7 @@ pub fn break_vigenere_cipher(_input: &str) {
 
         let mut distances = vec![];
         for _group in 0..(_input_bytes.len() / (_keysize*2)) {
-            let lower = _group * _keysize * 2;
+            let lower = _group * _keysize;
             let d = hamming_distance(&_input_bytes[lower..lower+_keysize], &_input_bytes[lower+_keysize..lower+_keysize*2]);
             distances.push(d);
         }
