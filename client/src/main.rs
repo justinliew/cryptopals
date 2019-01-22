@@ -10,7 +10,9 @@ fn main() {
     //     .expect("something went wrong reading the file");
 
     let contents = String::from("fuse fuel for falling flocks");
-    base::calc::break_vigenere_cipher(&contents.as_bytes().to_vec());
+    let key = String::from("few");
+    let encoded = base::calc::repeating_xor_from_bytes(contents.as_bytes(), key.as_bytes());
+    base::calc::break_vigenere_cipher(&encoded);
 
 //    base::calc::break_vigenere_cipher_base64(&contents.as_bytes());
 }
