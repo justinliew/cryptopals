@@ -282,9 +282,12 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
     let mut best_distance_key_size : i32 = 2;
     for keysize in 2..41 {
 
+        if keysize > input_bytes.len() / 2 {
+            break
+        }
+
         let mut distances = vec![];
-        // TODO this bound needs calculating
-        for group in 0..(input_bytes.len()/keysize-1) {
+        for group in 0..(input_bytes.len()/keysize-2) {
             let lower = group*keysize;
             let d = hamming_distance(&input_bytes[lower..lower+keysize], &input_bytes[lower+keysize..lower+keysize*2]);
             distances.push(d);
