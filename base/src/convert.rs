@@ -1,48 +1,48 @@
-pub fn hex_string_to_u8(_input: &str) -> Vec<u8> {
-    let mut _stream = String::new();
-    if _input.len() % 2 != 0 {
-        _stream.push_str("0");
+pub fn hex_string_to_u8(input: &str) -> Vec<u8> {
+    let mut stream = String::new();
+    if input.len() % 2 != 0 {
+        stream.push_str("0");
     }
-    _stream.push_str(_input);
+    stream.push_str(input);
 
-    let mut _output = Vec::new();
-    let mut _i = 0;
-    while _i < _stream.len() {
-        _output.push(u8::from_str_radix(&_stream[_i.._i+2],16).unwrap());
-        _i += 2;
+    let mut output = Vec::new();
+    let mut i = 0;
+    while i < stream.len() {
+        output.push(u8::from_str_radix(&stream[i..i+2],16).unwrap());
+        i += 2;
     }
-    _output
+    output
 }
 
 static HEX_TABLE: &'static [char] = &['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
 
-pub fn u8_to_hex_string(_input: &Vec<u8>) -> String {
-    let mut _output = String::new();
+pub fn u8_to_hex_string(input: &Vec<u8>) -> String {
+    let mut output = String::new();
 
-    for _i in _input.iter() {
+    for i in input.iter() {
 
-        let mut _quotient : u8 = *_i;
-        let mut _substring = String::new();
+        let mut quotient : u8 = *i;
+        let mut substring = String::new();
         loop {
-            let _remainder = _quotient % 16;
-            _quotient = _quotient / 16;
-            _substring.push(HEX_TABLE[_remainder as usize]);
-            if _quotient == 0 {
+            let remainder = quotient % 16;
+            quotient = quotient / 16;
+            substring.push(HEX_TABLE[remainder as usize]);
+            if quotient == 0 {
                 break
             }
         }
-        if _substring.len() == 1 {
-            _substring.push('0');
+        if substring.len() == 1 {
+            substring.push('0');
         }
-        _output.push_str(&_substring.chars().rev().collect::<String>());
+        output.push_str(&substring.chars().rev().collect::<String>());
     }
 
-    let mut _ret = String::new();
-    if _output.len() % 2 != 0 {
-        _ret.push_str("0");
+    let mut ret = String::new();
+    if output.len() % 2 != 0 {
+        ret.push_str("0");
     }
-    _ret.push_str(&_output);
-    _ret
+    ret.push_str(&output);
+    ret
 }
 
 pub fn u8_to_string(_input: &Vec<u8>) -> String {

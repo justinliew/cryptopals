@@ -5,25 +5,25 @@ use decode;
 mod c1_tests {
     #[test]
     fn example() {
-        let output = super::hex_to_base64(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
+        let output = super::hex_string_to_base64_string(&String::from("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"));
         assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
     }
 
     #[test]
     fn single() {
-        let output = super::hex_to_base64(&String::from("1"));
+        let output = super::hex_string_to_base64_string(&String::from("1"));
         assert_eq!(output, "AQ==");
     }
 
     #[test]
     fn double() {
-        let output = super::hex_to_base64(&String::from("12"));
+        let output = super::hex_string_to_base64_string(&String::from("12"));
         assert_eq!(output, "Eg==");
     }
 
     #[test]
     fn simplest_example() {
-        let output = super::hex_to_base64(&String::from("010101"));
+        let output = super::hex_string_to_base64_string(&String::from("010101"));
         assert_eq!(output, "AQEB");
     }
 }
@@ -54,13 +54,13 @@ mod c5_tests {
 
     #[test]
     fn test_newline() {
-        let s = super::repeating_xor(&String::from("\n"), &String::from("ICE"));        
+        let s = super::repeating_xor_to_hex_string(&String::from("\n"), &String::from("ICE"));        
         assert_eq!(s, "43");
     }
 
     #[test]
     fn test() {
-        let s = super::repeating_xor(&String::from("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"), &String::from("ICE"));        
+        let s = super::repeating_xor_to_hex_string(&String::from("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"), &String::from("ICE"));        
         assert_eq!(s, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
     }
 }
@@ -68,28 +68,23 @@ mod c5_tests {
 #[cfg(test)]
 mod c6_tests {
     
-    // #[test]
-    // fn simple() {
-    //     let original = super::hex_to_base64(&String::from("a"));
-    //     println!("Original: {}", original);
-    //     let decoded = super::decode_base64_to_bytes(&original);
-    //     let hex_string = super::convert::u8_to_hex_string(&decoded);
-    //     println!("Decoded: {}", hex_string);
-    // }
+    #[test]
+    fn simple() {
+        let original = super::hex_string_to_base64_string(&String::from("a"));
+        println!("Original: {}", original);
+        let decoded = super::decode_base64_to_bytes(&original);
+        let hex_string = super::convert::u8_to_hex_string(&decoded);
+        println!("Decoded: {}", hex_string);
+    }
 
     #[test]
     fn prebaked() {
         // we want to generate something here and ensure it gets back.
         let original_text = "fuse fuel for falling flocks";
         let key = "few";
-        let cipher_text = super::repeating_xor(&original_text, &key);
-        println!("Ciphertext: {}", cipher_text);
-        let base64 = super::hex_to_base64(&cipher_text); 
-        let hex = super::decode_base64_to_bytes(&base64);
-        let hex_string = super::convert::u8_to_hex_string(&hex);
-        println!("Decoded: {}", hex_string);
-        // TODO
-//        super::break_vigenere_cipher_base64(&base64);
+        let cipher_bytes = super::repeating_xor(&original_text, &key);
+        println!("Cipher Bytes: {:?}", cipher_bytes);
+        super::break_vigenere_cipher(&cipher_bytes);
     }
 }
 
@@ -97,43 +92,44 @@ static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L
                                   'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
                                   '0','1','2','3','4','5','6','7','8','9','+','/'];
 
-fn find_index_in_table(_input: u8) -> u8 {
+fn find_index_in_table(input: u8) -> u8 {
     for i in 0..TABLE.len() {
-        if _input == (TABLE[i] as u8) {
+        if input == (TABLE[i] as u8) {
             return i as u8
         }
     }
+    println!("Couldn't find {}", input);
     assert!(false);
     0
 }
 
-pub fn hex_to_base64(_input: &str) -> String {
+pub fn hex_string_to_base64_string(input: &str) -> String {
     let mut current_index = 0;
-    let _input_u8 = convert::hex_string_to_u8(_input);
+    let input_u8 = convert::hex_string_to_u8(input);
 
-    let mut _output = String::from("");
+    let mut output = String::from("");
     loop {
-        match _input_u8.len() - current_index {
-            0 => return _output,
+        match input_u8.len() - current_index {
+            0 => return output,
             1 => {
-                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
-                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4) as usize]);
-                _output.push('=');
-                _output.push('=');
-                return _output
+                output.push(TABLE[((input_u8[current_index] & 0xfc) >> 2) as usize]);
+                output.push(TABLE[((input_u8[current_index] & 0x3) << 4) as usize]);
+                output.push('=');
+                output.push('=');
+                return output
             },
             2 => {
-                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
-                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
-                _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2) as usize]);
-                _output.push('=');
-                return _output
+                output.push(TABLE[((input_u8[current_index] & 0xfc) >> 2) as usize]);
+                output.push(TABLE[((input_u8[current_index] & 0x3) << 4 | (input_u8[current_index+1] & 0xf0) >> 4) as usize]);
+                output.push(TABLE[((input_u8[current_index+1] & 0xf) << 2) as usize]);
+                output.push('=');
+                return output
             },
             _ => {
-                _output.push(TABLE[((_input_u8[current_index] & 0xfc) >> 2) as usize]);
-                _output.push(TABLE[((_input_u8[current_index] & 0x3) << 4 | (_input_u8[current_index+1] & 0xf0) >> 4) as usize]);
-                _output.push(TABLE[((_input_u8[current_index+1] & 0xf) << 2 | (_input_u8[current_index+2] & 0xfc) >> 6) as usize]);
-                _output.push(TABLE[(_input_u8[current_index+2] & 0x3f) as usize]);
+                output.push(TABLE[((input_u8[current_index] & 0xfc) >> 2) as usize]);
+                output.push(TABLE[((input_u8[current_index] & 0x3) << 4 | (input_u8[current_index+1] & 0xf0) >> 4) as usize]);
+                output.push(TABLE[((input_u8[current_index+1] & 0xf) << 2 | (input_u8[current_index+2] & 0xfc) >> 6) as usize]);
+                output.push(TABLE[(input_u8[current_index+2] & 0x3f) as usize]);
                 current_index = current_index + 3;
             }
         };
@@ -169,67 +165,72 @@ fn decode_from_base64(_input: &[u8], _output: &mut Vec<u8>) {
     }
 }
 
-pub fn decode_base64_to_bytes(_input: &str) -> Vec<u8> {
+pub fn decode_base64_to_bytes(input: &str) -> Vec<u8> {
     let mut current_index = 0;
-    let _input_u8 = _input.as_bytes();
 
-    let mut _output : Vec<u8> = Vec::new();
+    let stripped : String = input.chars().filter(|&c| c != '\n').collect();
+    let input_u8 = stripped.as_bytes();
+
+    let mut output : Vec<u8> = Vec::new();
     loop {
-        if _input_u8[current_index+2] == ('=' as u8) {
-            decode_from_base64(&_input_u8[current_index..current_index+2], &mut _output);
-            return _output
+        if input_u8[current_index+2] == ('=' as u8) {
+            decode_from_base64(&input_u8[current_index..current_index+2], &mut output);
+            return output
         }
-        if _input_u8[current_index+3] == ('=' as u8) {
-            decode_from_base64(&_input_u8[current_index..current_index+3], &mut _output);
-            return _output
+        if input_u8[current_index+3] == ('=' as u8) {
+            decode_from_base64(&input_u8[current_index..current_index+3], &mut output);
+            return output
         }
-        decode_from_base64(&_input_u8[current_index..current_index+4], &mut _output);
+        decode_from_base64(&input_u8[current_index..current_index+4], &mut output);
         current_index = current_index + 4;
-        if current_index >= _input_u8.len() {
-            return _output
+        if current_index >= input_u8.len() {
+            return output
         }
     }
 }
 
-pub fn fixed_xor(_lhs: &str, _rhs: &str) -> String {
-    let _lhs_hex = convert::hex_string_to_u8(_lhs);
-    let _rhs_hex = convert::hex_string_to_u8(_rhs);
+pub fn fixed_xor(lhs: &str, rhs: &str) -> String {
+    let lhs_hex = convert::hex_string_to_u8(lhs);
+    let rhs_hex = convert::hex_string_to_u8(rhs);
 
-    let res = _lhs_hex.iter()
-            .zip(_rhs_hex.iter())
+    let res = lhs_hex.iter()
+            .zip(rhs_hex.iter())
             .map(|(x,y)| (x ^ y))
             .collect();
     convert::u8_to_hex_string(&res)
 }
 
-pub fn repeating_xor(_human_string: &str, _mask: &str) -> String {
-    let _mask_bytes = _mask.as_bytes();
-    let _output = repeating_xor_from_bytes(_human_string, _mask_bytes);
-    convert::u8_to_hex_string(&_output)
+pub fn repeating_xor_to_hex_string(human_string: &str, mask: &str) -> String {
+    let output = repeating_xor(human_string, mask);
+    convert::u8_to_hex_string(&output)
 }
 
-pub fn repeating_xor_from_bytes(_human_string: &str, _mask_bytes: &[u8]) -> Vec<u8> {
-    // convert _human_string to hex
-    let _input = _human_string.as_bytes();
+pub fn repeating_xor(human_string: &str, mask: &str) -> Vec<u8> {
+    let mask_bytes = mask.as_bytes();
+    let input = human_string.as_bytes();
+    repeating_xor_from_bytes(input, mask_bytes)
+}
+
+pub fn repeating_xor_from_bytes(input: &[u8], mask_bytes: &[u8]) -> Vec<u8> {
 
     // convert _mask to repeating mask in hex
-    let _repetitions = _input.len() / _mask_bytes.len();
-    let _remainder = _input.len() % _mask_bytes.len();
+    let repetitions = input.len() / mask_bytes.len();
+    let remainder = input.len() % mask_bytes.len();
 
-    let mut _full_mask : Vec<u8> = Vec::new();
-    for _i in 0.._repetitions {
-        _full_mask.extend_from_slice(& _mask_bytes);
+    let mut full_mask : Vec<u8> = Vec::new();
+    for _ in 0..repetitions {
+        full_mask.extend_from_slice(&mask_bytes);
     }
-    for _i in 0.._remainder {
-        _full_mask.push(_mask_bytes[_i])
+    for i in 0..remainder {
+        full_mask.push(mask_bytes[i])
     }
-    convert::fixed_xor_from_u8_slice(_input, &_full_mask)
+    convert::fixed_xor_from_u8_slice(input, &full_mask)
 }
 
-fn count_bits(_byte: u8) -> i32 {
+fn count_bits(byte: u8) -> i32 {
     let mut ret : u8 = 0;
-    for _i in 0..8 {
-        ret += (_byte >> _i) & 1;
+    for i in 0..8 {
+        ret += (byte >> i) & 1;
     }
 
     ret as i32
@@ -246,47 +247,46 @@ fn hamming_distance(_lhs: &[u8], _rhs: &[u8]) -> i32 {
     _res
 }
 
-fn transpose_and_test(_input: &[u8], _keysize: i32) -> Vec<u8> {
-    let end = _input.len() as i32 - _keysize;
+fn transpose_and_test(input: &[u8], keysize: i32) -> Vec<u8> {
+    let end = input.len() as i32 - keysize;
     let mut blocks : Vec<Vec<u8>> = Vec::new(); 
-    for _i in 0.._keysize {
+    for _ in 0..keysize {
         blocks.push(Vec::new());
     }
 
-    for _i in 0..end {
-        let block_num = _i % _keysize;
-        blocks[block_num as usize].push(_input[_i as usize]);
+    for i in 0..end {
+        let block_num = i % keysize;
+        blocks[block_num as usize].push(input[i as usize]);
     }
 
-    let mut _output : Vec<u8> = Vec::new();
+    let mut output : Vec<u8> = Vec::new();
 
     for i in 0..blocks.len() {
-        let (_,_,_key_elem) = decode::get_best_candidate_sentence_from_hex_bytes(&blocks[i as usize]);
-        _output.push(_key_elem);
+        let (_,_,key_elem) = decode::get_best_candidate_sentence_from_hex_bytes(&blocks[i as usize]);
+        output.push(key_elem);
     }
-    _output
+    output
 }
 
-pub fn break_vigenere_cipher_base64(_input_base64: &str) {
+pub fn break_vigenere_cipher_base64(input_base64: &str) {
 
-    let _input_bytes = decode_base64_to_bytes(&_input_base64.replace("\n","")); 
-    break_vigenere_cipher(&_input_bytes);
+    let input_bytes = decode_base64_to_bytes(&input_base64); 
+    break_vigenere_cipher(&input_bytes);
 }
 
 // https://trustedsignal.blogspot.com/2015/06/xord-play-normalized-hamming-distance.html
 // https://trustedsignal.blogspot.com/2015/07/cracking-repeating-xor-key-crypto.html
-pub fn break_vigenere_cipher(_input_bytes: &Vec<u8>) {
+pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
-    let mut _keysize = 2;
-
-    let mut _best_distance : f32 = 99999.;
-    let mut _best_distance_key_size : i32 = 2;
-    for _keysize in 2..41 {
+    let mut best_distance : f32 = 99999.;
+    let mut best_distance_key_size : i32 = 2;
+    for keysize in 2..41 {
 
         let mut distances = vec![];
-        for _group in 0..(_input_bytes.len() / (_keysize*2)) {
-            let lower = _group * _keysize;
-            let d = hamming_distance(&_input_bytes[lower..lower+_keysize], &_input_bytes[lower+_keysize..lower+_keysize*2]);
+        for group in 0..(input_bytes.len() / (keysize*2)) {
+            let lower = group * keysize;
+            let d = hamming_distance(&input_bytes[lower..lower+keysize], &input_bytes[lower+keysize..lower+keysize*2]);
+//            println!("Hamming Distance of {:?} and {:?} is {}", input_bytes[lower..lower+keysize], input_bytes[lower+keysize..lower+keysize*2], d);
             distances.push(d);
         }
         if distances.len() == 0 {
@@ -294,23 +294,23 @@ pub fn break_vigenere_cipher(_input_bytes: &Vec<u8>) {
         }
 
         let mut avg : f32 = 0.0;
-        for _i in distances.iter() {
-            avg += *_i as f32;
+        for i in distances.iter() {
+            avg += *i as f32;
         }
-        avg = avg / _keysize as f32;
+        avg = avg / keysize as f32;
         avg = avg / distances.len() as f32;
-        println!("Keysize: {}, Distance: {}", _keysize, avg);
-        if avg < _best_distance {
-            _best_distance = avg;
-            _best_distance_key_size = _keysize as i32;
+        println!("Keysize: {}, Distance: {}", keysize, avg);
+        if avg < best_distance {
+            best_distance = avg;
+            best_distance_key_size = keysize as i32;
         }
     }
 
-    let _key = transpose_and_test(&_input_bytes, _best_distance_key_size);
-    println!("Possible best keysize is {}; key is {:?}", _best_distance_key_size, _key);
+    let key = transpose_and_test(&input_bytes, best_distance_key_size);
+    println!("Possible best keysize is {}; key is {:?}", best_distance_key_size, key);
 
-    let _decoded = repeating_xor_from_bytes(&_input_bytes, &_key);
-    let _decoded_string = convert::u8_to_string(&_decoded);
-//    println!("Decoded string: {}", _decoded_string);
+    let decoded = repeating_xor_from_bytes(input_bytes, &key);
+    let decoded_string = convert::u8_to_string(&decoded);
+//    println!("Decoded string: {}", decoded_string);
 
 }
