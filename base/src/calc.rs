@@ -287,7 +287,7 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
         }
 
         let mut distances = vec![];
-        for group in 0..(input_bytes.len()/keysize-2) {
+        for group in 0..(input_bytes.len()/keysize-1) {
             let lower = group*keysize;
             let d = hamming_distance(&input_bytes[lower..lower+keysize], &input_bytes[lower+keysize..lower+keysize*2]);
             distances.push(d);
