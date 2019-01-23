@@ -314,6 +314,6 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
     let decoded = repeating_xor_from_bytes(input_bytes, &key);
     let decoded_string = convert::u8_to_string(&decoded);
-//    println!("Decoded string: {}", decoded_string);
+    println!("Decoded string: {}", decoded_string);
 
 }
