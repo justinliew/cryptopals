@@ -248,7 +248,8 @@ fn hamming_distance(_lhs: &[u8], _rhs: &[u8]) -> i32 {
 }
 
 fn transpose_and_test(input: &[u8], keysize: i32) -> Vec<u8> {
-    let end = input.len() as i32 - keysize;
+//    let end = input.len() as i32 - keysize;
+    let end = input.len() as i32;
     let mut blocks : Vec<Vec<u8>> = Vec::new(); 
     for _ in 0..keysize {
         blocks.push(Vec::new());
@@ -278,8 +279,11 @@ pub fn break_vigenere_cipher_base64(input_base64: &str) {
 // https://trustedsignal.blogspot.com/2015/07/cracking-repeating-xor-key-crypto.html
 pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
-    let mut best_distance : f32 = 99999.;
-    let mut best_distance_key_size : i32 = 2;
+    // let mut best_distance : f32 = 99999.;
+    // let mut best_distance_key_size : i32 = 2;
+    type KeyCalc = (usize,f32);
+    let mut key_calcs : Vec<KeyCalc> = Vec::new();
+     
     for keysize in 2..41 {
 
         if keysize > input_bytes.len() / 2 {
@@ -303,17 +307,26 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
         avg = avg / keysize as f32;
         avg = avg / distances.len() as f32;
         println!("Keysize: {}, Distance: {}", keysize, avg);
-        if avg < best_distance {
-            best_distance = avg;
-            best_distance_key_size = keysize as i32;
-        }
+        key_calcs.push((keysize, avg));
+        // if avg < best_distance {
+        //     best_distance = avg;
+        //     best_distance_key_size = keysize as i32;
+        // }
     }
 
-    let key = transpose_and_test(&input_bytes, best_distance_key_size);
-    println!("Possible best keysize is {}; key is {:?}", best_distance_key_size, key);
+    // sort
+    key_calcs.sort_by(|a,b| a.1.partial_cmp(&b.1).unwrap());
 
-    let decoded = repeating_xor_from_bytes(input_bytes, &key);
-    let decoded_string = convert::u8_to_string(&decoded);
-    println!("Decoded string: {}", decoded_string);
+    // take the top 3
+
+    for i in 0..6 {
+        let key = transpose_and_test(&input_bytes, key_calcs[i].0 as i32);
+        println!("Possible best keysize is {}; key is {:?}", key_calcs[i].0, key);
+
+        let decoded = repeating_xor_from_bytes(input_bytes, &key);
+        let decoded_string = convert::u8_to_string(&decoded);
+        println!("Decoded string: {}", decoded_string);
+    }
+
 
 }
