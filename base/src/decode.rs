@@ -24,18 +24,33 @@ mod c4_tests {
 // ETAOIN SHRDLU
 fn score_candidate(candidate: &Vec<u8>) -> i32 {
     let mut common = HashMap::new();
-    common.insert('e',3);
-    common.insert('t',3);
-    common.insert('a',3);
-    common.insert('o',3);
-    common.insert('i',2);
-    common.insert('n',2);
-    common.insert('s',2);
-    common.insert('h',2);
-    common.insert('r',2);
-    common.insert('d',2);
-    common.insert('l',2);
-    common.insert('u',2);
+    common.insert('e',78);
+    common.insert('t',75);
+    common.insert('a',72);
+    common.insert('o',69);
+    common.insert('i',66);
+    common.insert('n',63);
+    common.insert('s',60);
+    common.insert('h',54);
+    common.insert('r',57);
+    common.insert('d',48);
+    common.insert('l',51);
+    common.insert('c',45);
+    common.insert('u',42);
+
+    common.insert('m',39);
+    common.insert('f',36);
+    common.insert('p',33);
+    common.insert('g',30);
+    common.insert('w',27);
+    common.insert('y',24);
+    common.insert('b',21);
+    common.insert('v',18);
+    common.insert('k',15);
+    common.insert('x',12);
+    common.insert('j',9);
+    common.insert('q',6);
+    common.insert('z',3);
 
     let mut score = 0;
     for i in candidate.iter() {
@@ -47,10 +62,10 @@ fn score_candidate(candidate: &Vec<u8>) -> i32 {
         if v >= 97 && v <= 122 {
             match common.get(&(v as char)) {
                 Some(c) => score = score + c,
-                None => score = score + 1                
+                None => score = score                
             }
         } else if *i < 32 || *i > 126 {
-            score = score-1;
+            score = score-100;
         } else {
             // this seems to break things
 //            score = score+1;
@@ -66,25 +81,26 @@ pub fn get_best_candidate_sentence(_input: &str) -> (String, i32, u8) {
     return get_best_candidate_sentence_from_hex_bytes(&_input_hex);
 }
 
-pub fn get_best_candidate_sentence_from_hex_bytes(_input_hex: &Vec<u8>) -> (String, i32, u8) {
-    let mut _best_score = 0;
-    let mut _best_string = String::new();
-    let mut _best_key : u8 = 0;
-    for _c in 1..255 {
-        let mut _mask = vec![];
-        for _i in 0.._input_hex.len() {
-            _mask.push(_c as u8);
+pub fn get_best_candidate_sentence_from_hex_bytes(input_hex: &Vec<u8>) -> (String, i32, u8) {
+    let mut best_score = 0;
+    let mut best_string = String::new();
+    let mut best_key : u8 = 0;
+    for c in 1..255 {
+        let mut mask = vec![];
+        for i in 0..input_hex.len() {
+            mask.push(c as u8);
         }
-        let _candidate = convert::fixed_xor_from_u8(&_input_hex, &_mask);
-        let _score = score_candidate(&_candidate);
-        if _score > _best_score {
-            _best_score = _score;
-            _best_string = convert::u8_to_string(&_candidate);
-            _best_key = _c;
+        let candidate = convert::fixed_xor_from_u8(&input_hex, &mask);
+        let score = score_candidate(&candidate);
+        println!("Score for {} is {}", c as char, score);
+        if score > best_score {
+            best_score = score;
+            best_string = convert::u8_to_string(&candidate);
+            best_key = c;
         }
     }
 
-    (_best_string, _best_score, _best_key)
+    (best_string, best_score, best_key)
 }
 
 pub fn find_sentence()-> String {
