@@ -94,7 +94,7 @@ pub fn get_best_candidate_sentence_from_hex_bytes(input_hex: &Vec<u8>) -> (Strin
         let candidate = convert::fixed_xor_from_u8(&input_hex, &mask);
         let score = score_candidate(&candidate);
         // if score > 0 {
-        //     println!("Score for {} decoding {:?} is {}", c as char, candidate, score);
+        //     println!("Score for {} is {}", c as char, score);
         // }
         if score > best_score {
             best_score = score;
