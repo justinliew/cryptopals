@@ -264,7 +264,7 @@ fn transpose_and_test(input: &[u8], keysize: i32) -> Vec<u8> {
 
     for i in 0..blocks.len() {
         let (_,_,key_elem) = decode::get_best_candidate_sentence_from_hex_bytes(&blocks[i as usize]);
-        println!("Key Elem: {:?}", key_elem);
+//        println!("Key Elem: {:?}", key_elem);
         output.push(key_elem);
     }
     output
@@ -280,8 +280,6 @@ pub fn break_vigenere_cipher_base64(input_base64: &str) {
 // https://trustedsignal.blogspot.com/2015/07/cracking-repeating-xor-key-crypto.html
 pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
-    // let mut best_distance : f32 = 99999.;
-    // let mut best_distance_key_size : i32 = 2;
     type KeyCalc = (usize,f32);
     let mut key_calcs : Vec<KeyCalc> = Vec::new();
      
@@ -309,10 +307,6 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
         avg = avg / distances.len() as f32;
         println!("Keysize: {}, Distance: {}", keysize, avg);
         key_calcs.push((keysize, avg));
-        // if avg < best_distance {
-        //     best_distance = avg;
-        //     best_distance_key_size = keysize as i32;
-        // }
     }
 
     // sort
@@ -320,17 +314,12 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
     // take the top 3
 
-    // for i in 0..6 {
-    //     let key = transpose_and_test(&input_bytes, key_calcs[i].0 as i32);
-    //     println!("Possible best keysize is {}; key is {}", key_calcs[i].0, convert::u8_to_string(&key));
+    for i in 0..5 {
+        let key = transpose_and_test(&input_bytes, key_calcs[i].0 as i32);
+        println!("Possible best keysize is {}; key is {}", key_calcs[i].0, convert::u8_to_string(&key));
 
-    //     let decoded = repeating_xor_from_bytes(input_bytes, &key);
-    //     let decoded_string = convert::u8_to_string(&decoded);
-    //     println!("Decoded string: {}", decoded_string);
-    // }
-
-    let key = transpose_and_test(&input_bytes, 3);
-    let decoded = repeating_xor_from_bytes(input_bytes, &key);
-    let decoded_string = convert::u8_to_string(&decoded);
-    println!("Decoded string: {} from Key: {}", decoded_string, convert::u8_to_string(&key));
+        let decoded = repeating_xor_from_bytes(input_bytes, &key);
+        let decoded_string = convert::u8_to_string(&decoded);
+        println!("Decoded string: {}", decoded_string);
+    }
 }
