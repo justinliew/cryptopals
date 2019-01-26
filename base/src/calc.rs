@@ -86,6 +86,18 @@ mod c6_tests {
         println!("Cipher Bytes: {:?}", cipher_bytes);
         super::break_vigenere_cipher(&cipher_bytes);
     }
+
+    #[test]
+    fn base64_decode_test() {
+
+        let s = super::hex_string_to_base64_string("020406080A0C0E101214");
+        println!("String: {}", s);
+        // TODO - I was seeing some weirdness converting 020406081012114161820 to and from base64, so I should try that here
+        let bytes = super::decode_base64_to_bytes("AgQGCAoMDhASFA==");
+        println!("Bytes: {:?}", bytes);
+        assert_eq!(0,1);
+        
+    }
 }
 
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
