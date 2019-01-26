@@ -62,9 +62,9 @@ fn score_candidate(candidate: &Vec<u8>) -> i32 {
         if v >= 97 && v <= 122 {
             match common.get(&(v as char)) {
                 Some(c) => score = score + c,
-                None => score = score - 100            
+                None => score = score - 100          
             }
-        } else if *i < 65 || *i > 122 {
+        } else if *i < 32 || *i > 126 {
             score = score-100;
         } else {
             // this seems to break things
@@ -88,7 +88,7 @@ pub fn get_best_candidate_sentence_from_hex_bytes(input_hex: &Vec<u8>) -> (Strin
 //    println!("Trying {:?}", input_hex);
     for c in 1..255 {
         let mut mask = vec![];
-        for i in 0..input_hex.len() {
+        for _ in 0..input_hex.len() {
             mask.push(c as u8);
         }
         let candidate = convert::fixed_xor_from_u8(&input_hex, &mask);

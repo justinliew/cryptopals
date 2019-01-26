@@ -90,12 +90,19 @@ mod c6_tests {
     #[test]
     fn base64_decode_test() {
 
-        let s = super::hex_string_to_base64_string("020406080A0C0E101214");
-        println!("String: {}", s);
-        // TODO - I was seeing some weirdness converting 020406081012114161820 to and from base64, so I should try that here
-        let bytes = super::decode_base64_to_bytes("AgQGCAoMDhASFA==");
-        println!("Bytes: {:?}", bytes);
-        assert_eq!(0,1);
+        let a = super::hex_string_to_base64_string("1012");
+        println!("A: {}", a);
+        let ba = super::decode_base64_to_bytes("EBI=");
+        println!("Bytes: {:?}", ba);
+        assert_eq!(ba[0], 16);
+        assert_eq!(ba[1], 18);
+
+        // let s = super::hex_string_to_base64_string("020406080A0C0E101214");
+        // println!("String: {}", s);
+        // // TODO - I was seeing some weirdness converting 020406081012114161820 to and from base64, so I should try that here
+        // let bytes = super::decode_base64_to_bytes("AgQGCAoMDhASFA==");
+        // println!("Bytes: {:?}", bytes);
+        // assert_eq!(0,1);
         
     }
 }
@@ -148,30 +155,33 @@ pub fn hex_string_to_base64_string(input: &str) -> String {
     };
 }
 
-fn decode_from_base64(_input: &[u8], _output: &mut Vec<u8>) {
-    let _decoded_0 = find_index_in_table(_input[0]);
-    let _decoded_1 = find_index_in_table(_input[1]);
-    let _byte_0 = (_decoded_0 << 2) | (_decoded_1 >> 4);
-    match _input.len() {
+fn decode_from_base64(input: &[u8], output: &mut Vec<u8>) {
+    let decoded_0 = find_index_in_table(input[0]);
+    let decoded_1 = find_index_in_table(input[1]);
+    println!("0: {}", decoded_0);
+    println!("1: {}", decoded_1);
+    let byte_0 = (decoded_0 << 2) | (decoded_1 >> 4);
+    match input.len() {
         2 => {
-            _output.push(_byte_0);
+            output.push(byte_0);
             return;
         },
         3 => {
-            let _decoded_2 = find_index_in_table(_input[2]);
-            let _byte_1 = ((_decoded_1 >> 4) & 0xf0) | (_decoded_2 >> 2);
-            _output.push(_byte_0);
-            _output.push(_byte_1);
+            let decoded_2 = find_index_in_table(input[2]);
+            println!("2: {}", decoded_2);
+            let byte_1 = ((decoded_1 << 4) & 0xf0) | (decoded_2 >> 2);
+            output.push(byte_0);
+            output.push(byte_1);
             return;
         },
         4 => {
-            let _decoded_2 = find_index_in_table(_input[2]);
-            let _decoded_3 = find_index_in_table(_input[3]);
-            let _byte_1 = ((_decoded_1 >> 4) & 0xf0) | (_decoded_2 >> 2);
-            let _byte_2 = ((_decoded_2 >> 6) & 0xc0) | (_decoded_3 & 0x3f);
-            _output.push(_byte_0);
-            _output.push(_byte_1);
-            _output.push(_byte_2);
+            let decoded_2 = find_index_in_table(input[2]);
+            let decoded_3 = find_index_in_table(input[3]);
+            let byte_1 = ((decoded_1 << 4) & 0xf0) | (decoded_2 >> 2);
+            let byte_2 = ((decoded_2 >> 6) & 0xc0) | (decoded_3 & 0x3f);
+            output.push(byte_0);
+            output.push(byte_1);
+            output.push(byte_2);
         },
         _ => assert!(false)
     }
