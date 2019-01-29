@@ -105,6 +105,14 @@ mod c6_tests {
         // assert_eq!(0,1);
         
     }
+
+    #[test]
+    fn base64_decode_test2() {
+        let base64_string = String::from("TTlM");
+        let decoded = super::decode_base64_to_bytes(&base64_string);
+        println!("{:?}", decoded);
+        assert_eq!(decoded[2], 76);
+    }
 }
 
 static TABLE: &'static [char] = &['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -158,8 +166,6 @@ pub fn hex_string_to_base64_string(input: &str) -> String {
 fn decode_from_base64(input: &[u8], output: &mut Vec<u8>) {
     let decoded_0 = find_index_in_table(input[0]);
     let decoded_1 = find_index_in_table(input[1]);
-    println!("0: {}", decoded_0);
-    println!("1: {}", decoded_1);
     let byte_0 = (decoded_0 << 2) | (decoded_1 >> 4);
     match input.len() {
         2 => {
@@ -168,7 +174,6 @@ fn decode_from_base64(input: &[u8], output: &mut Vec<u8>) {
         },
         3 => {
             let decoded_2 = find_index_in_table(input[2]);
-            println!("2: {}", decoded_2);
             let byte_1 = ((decoded_1 << 4) & 0xf0) | (decoded_2 >> 2);
             output.push(byte_0);
             output.push(byte_1);
@@ -178,7 +183,7 @@ fn decode_from_base64(input: &[u8], output: &mut Vec<u8>) {
             let decoded_2 = find_index_in_table(input[2]);
             let decoded_3 = find_index_in_table(input[3]);
             let byte_1 = ((decoded_1 << 4) & 0xf0) | (decoded_2 >> 2);
-            let byte_2 = ((decoded_2 >> 6) & 0xc0) | (decoded_3 & 0x3f);
+            let byte_2 = ((decoded_2 << 6) & 0xc0) | (decoded_3 & 0x3f);
             output.push(byte_0);
             output.push(byte_1);
             output.push(byte_2);
@@ -295,6 +300,7 @@ fn transpose_and_test(input: &[u8], keysize: i32) -> Vec<u8> {
 pub fn break_vigenere_cipher_base64(input_base64: &str) {
 
     let input_bytes = decode_base64_to_bytes(&input_base64); 
+//    println!("{:?}", input_bytes);
     break_vigenere_cipher(&input_bytes);
 }
 
@@ -342,6 +348,8 @@ pub fn break_vigenere_cipher(input_bytes: &Vec<u8>) {
 
         let decoded = repeating_xor_from_bytes(input_bytes, &key);
         let decoded_string = convert::u8_to_string(&decoded);
-        println!("Decoded string: {}", decoded_string);
+        if i == 0 {
+            println!("Decoded string: {}", decoded_string);
+        }
     }
 }
