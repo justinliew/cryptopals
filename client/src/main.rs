@@ -3,22 +3,24 @@ use std::io::prelude::*;
 extern crate base;
 extern crate crypto;
 
+use std::collections::HashSet;
+
 use crypto::aes;
 use crypto::blockmodes;
 use crypto::buffer;
 
-fn main() {
-// Challenge 6
-//     let mut f = File::open("6.txt").expect("file not found");
+fn c6() {
+    let mut f = File::open("6.txt").expect("file not found");
 
-//     let mut contents = String::new();
-//     f.read_to_string(&mut contents)
-//         .expect("something went wrong reading the file");
-//    base::calc::break_vigenere_cipher_base64(&contents);
-//    let encoded = String::from("JhkPTTlMBgoVBE0FHEUSERUFUA1FCxECCFAJHQQVEQEVTBENGRVNBwMXDgtBGhUACUUeDh9QGA0AWAkIHBxFAxENCE8=");
-//    base::calc::break_vigenere_cipher_base64(&encoded);
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+   base::calc::break_vigenere_cipher_base64(&contents);
+   let encoded = String::from("JhkPTTlMBgoVBE0FHEUSERUFUA1FCxECCFAJHQQVEQEVTBENGRVNBwMXDgtBGhUACUUeDh9QGA0AWAkIHBxFAxENCE8=");
+   base::calc::break_vigenere_cipher_base64(&encoded);
+}
 
-// Challenge 7
+fn c7() {
     let key = String::from("YELLOW SUBMARINE");
     let mut decryptor = aes::ecb_decryptor(aes::KeySize::KeySize128, &key.as_bytes(), blockmodes::NoPadding);
 
@@ -39,4 +41,41 @@ fn main() {
 
     let s = base::convert::u8_to_string(&dec);
     println!("{}", s);
+}
+
+fn c8() {
+    let mut f = File::open("8.txt").expect("file not found");
+
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+    let lines = contents.split("\n");
+
+    type LineCalc = (i32,usize);
+    let mut line_calcs : Vec<LineCalc> = Vec::new();
+
+    let mut idx = 0;
+    for line in lines {
+        if line.len() == 0 {
+            continue
+        }
+        let mut set = HashSet::new();
+        let len = line.len();
+
+        for b in 0..(len/16) {
+            let s = &line[b*16..b*16+16];
+            if idx == 132 {
+                println!("{}", s);
+            }
+            set.insert(s);
+        }
+        line_calcs.push((idx, len/16 - set.len()));
+        idx = idx + 1;
+    }
+    line_calcs.sort_by(|a,b| a.1.partial_cmp(&b.1).unwrap());
+    println!("{} of {}", line_calcs[line_calcs.len()-1].0, idx+1);
+}
+
+fn main() {
+    c8();
 }
