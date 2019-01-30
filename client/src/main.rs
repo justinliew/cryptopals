@@ -28,7 +28,7 @@ fn main() {
     f.read_to_string(&mut contents)
         .expect("something went wrong reading the file");
 
-    let enc = contents.as_bytes();
+    let enc = base::calc::decode_base64_to_bytes(&contents);
     let mut dec = vec![0u8; enc.len()];
 
     {
@@ -37,9 +37,6 @@ fn main() {
         decryptor.decrypt(&mut read_buf, &mut write_buf, true);
     }
 
-    let s = base::convert::u8_to_hex_string(&dec);
-    println!("S: {}", s);
-    for cur_byte in dec {
-        print!("{:02x} ", cur_byte);
-    }
+    let s = base::convert::u8_to_string(&dec);
+    println!("{}", s);
 }
