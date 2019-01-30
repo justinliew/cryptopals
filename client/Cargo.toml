@@ -5,3 +5,6 @@ authors = ["Justin Liew <justinliew@gmail.com>"]
 
 [dependencies.base]
 path = "../base"
+
+[dependencies]
+rust-crypto = "^0.2"
