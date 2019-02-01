@@ -1,3 +1,5 @@
+extern crate crypto;
+
 #[cfg(test)]
 mod c9_tests {
     #[test]
@@ -37,6 +39,20 @@ mod c9_tests {
     }
 }
 
+#[cfg(test)]
+mod c10_tests {
+    #[test]
+    fn basic_cbc_encrypt() {
+        let enc = super::cbc::encrypt("YELLOW SUBMARINE", "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+        assert_eq!(enc, "YELLOW SUBMARINE");
+    }
+
+    #[test]
+    fn two_block_cbc_encrypt() {
+
+    }
+}
+
 fn pkcs7_pad(s : &str, len: usize) -> String {
     if s.len() >= len {
         return s.to_string()
@@ -49,27 +65,43 @@ fn pkcs7_pad(s : &str, len: usize) -> String {
     ret
 }
 
-fn cbc(key: &str, ciphertext: &str, iv: &str) -> String {
-    let key = String::from("YELLOW SUBMARINE");
-    let mut decryptor = aes::ecb_decryptor(aes::KeySize::KeySize128, &key.as_bytes(), blockmodes::NoPadding);
+// TODO break plaintext into blocks of 16
+// TODO pad last block
+// TODO xor + encrypt
+pub mod cbc {
+    pub fn encrypt(key: &str, plaintext: &str, iv: &str) -> std::Vec<u8> {
+        let mut encryptor = crypto::aes::ecb_encryptor(crypto::aes::KeySize::KeySize128, &key.as_bytes(), crypto::blockmodes::NoPadding);
 
-    let mut f = File::open("7.txt").expect("file not found");
-
-    let mut contents = String::new();
-    f.read_to_string(&mut contents)
-        .expect("something went wrong reading the file");
-
-    let enc = base::calc::decode_base64_to_bytes(&contents);
-    let mut dec = vec![0u8; enc.len()];
-
-    {
-        let mut read_buf = buffer::RefReadBuffer::new(&enc);
-        let mut write_buf = buffer::RefWriteBuffer::new(&mut dec);
-        decryptor.decrypt(&mut read_buf, &mut write_buf, true);
+        let mut res = String::from("");
+        for _ in 0..plaintext.len()/16 {
+            let plain = plaintext.as_bytes();
+            let mut enc = vec![0u8; plain.len()];
+            {
+                let mut read_buf = crypto::buffer::RefReadBuffer::new(&plain);
+                let mut write_buf = crypto::buffer::RefWriteBuffer::new(&mut enc);
+                encryptor.encrypt(&mut read_buf, &mut write_buf, true);
+            }
+            let s = String::from_utf8(enc).expect("Didn't find a UTF8 string");
+            res.push_str(&s);
+        }
+        res
     }
 
-    let s = base::convert::u8_to_string(&dec);
-    println!("{}", s);
+    // TODO break ciphertext into blocks of 16
+    // TODO decrypt
+    // TODO last block
+    pub fn decrypt(key: &str, ciphertext: &str, iv: &str) -> String {
+        let mut decryptor = crypto::aes::ecb_decryptor(crypto::aes::KeySize::KeySize128, &key.as_bytes(), crypto::blockmodes::NoPadding);
+
+        let enc = ciphertext.as_bytes();
+        let mut dec = vec![0u8; enc.len()];
+        {
+            let mut read_buf = crypto::buffer::RefReadBuffer::new(&enc);
+            let mut write_buf = crypto::buffer::RefWriteBuffer::new(&mut dec);
+            decryptor.decrypt(&mut read_buf, &mut write_buf, true);
+        }
+
+        "".to_string()
+    }
 }
 
-}

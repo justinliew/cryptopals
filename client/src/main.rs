@@ -1,9 +1,12 @@
 use std::fs::File;
 use std::io::prelude::*;
+use std::fmt;
 extern crate base;
 extern crate crypto;
 
 use std::collections::HashSet;
+
+use base::block;
 
 use crypto::aes;
 use crypto::blockmodes;
@@ -76,6 +79,18 @@ fn c8() {
     println!("{} of {}", line_calcs[line_calcs.len()-1].0, idx+1);
 }
 
+fn c10() {
+    let mut f = File::open("10.txt").expect("file not found");
+
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+    let stripped : String = contents.chars().filter(|&c| c != '\n').collect();
+    let decrypted = block::cbc::decrypt("YELLOW SUBMARINE", &stripped, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+    println!("Decrypted: {}", decrypted);
+}
+
 fn main() {
-    c8();
+//    c8();
+    c10();
 }
