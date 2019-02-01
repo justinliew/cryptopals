@@ -49,9 +49,8 @@ fn pkcs7_pad(s : &str, len: usize) -> String {
     ret
 }
 
-fn cbc(key: &str, ciphertext: &str, iv: &str) -> String {
-    let key = String::from("YELLOW SUBMARINE");
-    let mut decryptor = aes::ecb_decryptor(aes::KeySize::KeySize128, &key.as_bytes(), blockmodes::NoPadding);
+fn encrypt_cbc(key: &str, ciphertext: &str, iv: &str) -> String {
+    let mut encryptor = aes::ecb_encryptor(aes::KeySize::KeySize128, &key.as_bytes(), blockmodes::NoPadding);
 
     let mut f = File::open("7.txt").expect("file not found");
 
