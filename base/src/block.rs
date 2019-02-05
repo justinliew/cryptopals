@@ -1,5 +1,3 @@
-extern crate crypto;
-
 #[cfg(test)]
 mod c9_tests {
     #[test]
@@ -44,7 +42,10 @@ mod c10_tests {
     #[test]
     fn basic_cbc_encrypt() {
         let enc = super::cbc::encrypt("YELLOW SUBMARINE", "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
-        assert_eq!(enc, "YELLOW SUBMARINE");
+        // TODO
+        let answer : Vec<u8> = [118, 209, 203, 75, 175, 162, 70, 226, 227, 175, 3, 93, 108, 19, 195, 114].to_vec();
+//        let fake : Vec<u8> = Vec::new();
+        assert_eq!(enc, answer);
     }
 
     #[test]
@@ -69,20 +70,25 @@ fn pkcs7_pad(s : &str, len: usize) -> String {
 // TODO pad last block
 // TODO xor + encrypt
 pub mod cbc {
-    pub fn encrypt(key: &str, plaintext: &str, iv: &str) -> std::Vec<u8> {
-        let mut encryptor = crypto::aes::ecb_encryptor(crypto::aes::KeySize::KeySize128, &key.as_bytes(), crypto::blockmodes::NoPadding);
 
-        let mut res = String::from("");
-        for _ in 0..plaintext.len()/16 {
-            let plain = plaintext.as_bytes();
+    use crypto::blockmodes;
+    use crypto::aes::KeySize;
+    use crypto::aes::ecb_encryptor;
+    use crypto::buffer::{RefReadBuffer,RefWriteBuffer};
+
+    pub fn encrypt(key: &str, plaintext: &str, iv: &str) -> Vec<u8> {
+        let mut encryptor = ecb_encryptor(KeySize::KeySize128, &key.as_bytes(), blockmodes::NoPadding);
+
+        let mut res = Vec::new();
+        for i in 0..plaintext.len()/16 {
+            let plain = plaintext[i..i+16].as_bytes();
             let mut enc = vec![0u8; plain.len()];
             {
-                let mut read_buf = crypto::buffer::RefReadBuffer::new(&plain);
-                let mut write_buf = crypto::buffer::RefWriteBuffer::new(&mut enc);
+                let mut read_buf = RefReadBuffer::new(&plain);
+                let mut write_buf = RefWriteBuffer::new(&mut enc);
                 encryptor.encrypt(&mut read_buf, &mut write_buf, true);
             }
-            let s = String::from_utf8(enc).expect("Didn't find a UTF8 string");
-            res.push_str(&s);
+            res.append(&mut enc);
         }
         res
     }
@@ -90,18 +96,18 @@ pub mod cbc {
     // TODO break ciphertext into blocks of 16
     // TODO decrypt
     // TODO last block
-    pub fn decrypt(key: &str, ciphertext: &str, iv: &str) -> String {
-        let mut decryptor = crypto::aes::ecb_decryptor(crypto::aes::KeySize::KeySize128, &key.as_bytes(), crypto::blockmodes::NoPadding);
+    // pub fn decrypt(key: &str, ciphertext: &str, iv: &str) -> String {
+    //     let mut decryptor = crypto::aes::ecb_decryptor(crypto::aes::KeySize::KeySize128, &key.as_bytes(), crypto::blockmodes::NoPadding);
 
-        let enc = ciphertext.as_bytes();
-        let mut dec = vec![0u8; enc.len()];
-        {
-            let mut read_buf = crypto::buffer::RefReadBuffer::new(&enc);
-            let mut write_buf = crypto::buffer::RefWriteBuffer::new(&mut dec);
-            decryptor.decrypt(&mut read_buf, &mut write_buf, true);
-        }
+    //     let enc = ciphertext.as_bytes();
+    //     let mut dec = vec![0u8; enc.len()];
+    //     {
+    //         let mut read_buf = crypto::buffer::RefReadBuffer::new(&enc);
+    //         let mut write_buf = crypto::buffer::RefWriteBuffer::new(&mut dec);
+    //         decryptor.decrypt(&mut read_buf, &mut write_buf, true);
+    //     }
 
-        "".to_string()
-    }
+    //     "".to_string()
+    // }
 }
 
