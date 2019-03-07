@@ -91,24 +91,6 @@ fn c10() {
     // println!("Decrypted: {}", decrypted);
 }
 
-#[derive(Debug)]
-struct Color {
-    red: u8,
-    green: u8,
-    blue: u8,
-}
-
-impl Display for Color {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "RGB ({},{},{}) 0x{:X}{:X}{:X}", self.red, self.green, self.blue, self.red, self.green, self.blue)
-    }
-}
-
 fn main() {
-//    c8();
 //    c10();
-
-    let c : Color = Color{red:128,green:255,blue:90};
-    println!("{}", c);
-
 }
